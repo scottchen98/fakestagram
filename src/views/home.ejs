@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Instagram</title>
+
+    <!-- Socket.io Client Installation -->
+    <script
+      src="https://cdn.socket.io/4.5.3/socket.io.min.js"
+      integrity="sha384-WPFUvHkB1aHA5TDSZi6xtDgkF0wXJcIIxXhC6h8OT8EH3fC5PWro5pWJ1THjcfEi"
+      crossorigin="anonymous"
+    ></script>
+    <style>
+      body {
+        background-color: #f1f1f1;
+        margin: 0;
+      }
+      h1 {
+        font-size: 60px;
+        padding-left: 30px;
+        font-family: sans-serif;
+        margin-left: 25px;
+      }
+      .logo {
+        background-color: white;
+        height: 100px;
+      }
+      .igLogo {
+        height: 80px;
+        padding-top: 10px;
+        margin-left: 55px;
+      }
+      .user-container {
+        display: flex;
+        flex-direction: column;
+        padding-left: 60px;
+      }
+      .user {
+        display: flex;
+        justify-content: space-evenly;
+        margin-bottom: 30px;
+        height: 200px;
+        width: 300px;
+        background-color: white;
+        align-items: center;
+        padding: 0 25px;
+      }
+      .profile-img {
+        border-radius: 50%;
+        width: 120px;
+        transition: all 0.3s ease-out;
+        cursor: pointer;
+      }
+      .profile-img:hover {
+        transform: scale3d(1.2, 1.2, 1.2);
+        border: 2px solid #00ffa7;
+        border-radius: 0;
+      }
+      .black-buttons {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-evenly;
+        height: 100%;
+      }
+      form {
+        display: inline-grid;
+      }
+      #fileUpload {
+        padding-bottom: 10px;
+      }
+      .user-button,
+      input[type="file"],
+      button {
+        cursor: pointer;
+        background-color: black;
+        color: white;
+        padding: 1rem;
+        border: none;
+        border-radius: 0.5rem;
+        box-shadow: 0px -3px 0px 0px #00ffa7 inset;
+        cursor: pointer;
+        transition: all 0.3s ease-in-out;
+        opacity: 0.7;
+      }
+      .user-button:after {
+        content: "";
+        width: 100%;
+        background: black;
+      }
+      .user-button:hover,
+      input[type="file"]:hover,
+      button:hover {
+        box-shadow: 0px -3.1rem 0px 0px #00ffa7 inset;
+        color: black;
+        transform: scale3d(1.1, 1.1, 1.1) translate3d(0, -5px, 0);
+        opacity: 1;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="logo">
+      <img class="igLogo" src="./instagram_logo.png" alt="instagram logo" />
+    </div>
+
+    <h1>Users</h1>
+
+    <% usersList.forEach(user => { %>
+
+    <div class="user-container">
+      <div class="user">
+        <div class="profile">
+          <img
+            class="profile-img"
+            src="../photos/<%= user.username %>/<%= user.profile %>"
+            alt="<%= user.username %> profile"
+          />
+        </div>
+
+        <div class="black-buttons">
+          <form
+            id="upload-form"
+            action="/images"
+            enctype="multipart/form-data"
+            method="POST"
+          >
+            <input
+              id="fileUpload"
+              type="file"
+              name="userFile"
+              accept=".jpeg, .png"
+              multiple
+              required
+            />
+            <button
+              id="upload-button"
+              type="submit"
+              class="user-button"
+              name="username"
+              value="<%= user.username %>"
+            >
+              Upload
+            </button>
+          </form>
+
+          <form action="/feed" method="GET">
+            <button
+              class="user-button"
+              name="username"
+              value="<%= user.username %>"
+            >
+              <%= user.username %>
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+    <% }) %>
+
+    <script>
+      let socket = io.connect("http://localhost:3000");
+
+      const input = document.getElementById("fileUpload");
+      const uploadButton = document.getElementById("upload-button");
+
+      input.addEventListener("change", function (event) {
+        const fileList = this.files;
+        uploadButton.addEventListener("click", function (event) {
+          const username = event.target.value;
+          for (const file of fileList) {
+            socket.emit("upload-info", username, file.name);
+          }
+        });
+      });
+    </script>
+  </body>
+</html>
